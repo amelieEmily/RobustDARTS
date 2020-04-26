@@ -179,7 +179,7 @@ def write_yaml_results_eval(args, results_file, result_to_log):
 
   try:
     with open(results_file, 'r') as f:
-      result = yaml.load(f)
+      result = yaml.load(f, Loader=yaml.Loader)
     if setting in result.keys():
       if regularization in result[setting].keys():
         if args.search_task_id in result[setting][regularization]:
@@ -215,7 +215,7 @@ def write_yaml_results(args, results_file, result_to_log):
 
   try:
     with open(results_file, 'r') as f:
-      result = yaml.load(f)
+      result = yaml.load(f, Loader=yaml.Loader)
     if setting in result.keys():
       if regularization in result[setting].keys():
         result[setting][regularization].update({args.task_id: result_to_log})
@@ -280,6 +280,69 @@ def _data_transforms_svhn(args):
     ])
   return train_transform, valid_transform
 
+def _data_transforms_dr_detection(args):
+  DR_DETECTION_MEAN = [0.42, 0.22, 0.075]
+  DR_DETECTION_STD = [0.27, 0.15, 0.081]
+
+  train_transform = transforms.Compose([
+      transforms.Resize(256),  # 256
+      transforms.RandomRotation((-45.0, +45.0)),
+      transforms.RandomResizedCrop(224, scale=(0.9, 1.1), ratio=(0.9, 1.1)),  # 224
+      transforms.RandomHorizontalFlip(),
+      transforms.RandomVerticalFlip(),
+      transforms.ColorJitter(brightness=0.1, contrast=[0.75, 1.5],
+                             saturation=[0.75, 1.5], hue=0.15),
+      transforms.ToTensor(),
+      transforms.Normalize(mean=DR_DETECTION_MEAN, std=DR_DETECTION_STD),
+      # transforms.RandomErasing(),
+  ])
+  if args.cutout:
+    train_transform.transforms.append(Cutout(args.cutout_length,
+                                      args.cutout_prob))
+
+  valid_transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=DR_DETECTION_MEAN, std=DR_DETECTION_STD),
+    ])
+  return train_transform, valid_transform
+
+def _data_transforms_malaria(args):
+
+  train_transform = transforms.Compose([
+      transforms.Resize(256),  # 256
+      transforms.RandomRotation((-45.0, +45.0)),
+  ])
+  if args.cutout:
+    train_transform.transforms.append(Cutout(args.cutout_length,
+                                      args.cutout_prob))
+
+  valid_transform = transforms.Compose([
+        transforms.Resize(50),
+        transforms.RandomRotation((-45.0, +45.0)),
+    ])
+  return train_transform, valid_transform
+
+def _data_transforms_mnist(args):
+  MNIST_MEAN = [0.5, 0.5, 0.5]
+  MNIST_STD = [0.5, 0.5, 0.5]
+
+  train_transform = transforms.Compose([
+    transforms.RandomCrop(32, padding=4),
+    transforms.RandomHorizontalFlip(),
+    transforms.ToTensor(),
+    transforms.Normalize(MNIST_MEAN, MNIST_STD),
+  ])
+  if args.cutout:
+    train_transform.transforms.append(Cutout(args.cutout_length,
+                                      args.cutout_prob))
+
+  valid_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(MNIST_MEAN, MNIST_STD),
+    ])
+  return train_transform, valid_transform
 
 def _data_transforms_cifar100(args):
   CIFAR_MEAN = [0.5071, 0.4865, 0.4409]

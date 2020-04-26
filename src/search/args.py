@@ -4,6 +4,21 @@ import argparse
 import numpy as np
 import torch.utils
 import torchvision.datasets as dset
+import random
+import sys
+FILE_ABSOLUTE_PATH = os.path.abspath(__file__)
+search_folder_path = os.path.dirname(FILE_ABSOLUTE_PATH)
+src_path = os.path.dirname(search_folder_path)
+robustdarts_path = os.path.dirname(src_path)
+project_path = os.path.dirname(robustdarts_path)
+dr_detection_dataset_path = os.path.join(project_path, 'DR_Detection', 'dataset')
+dr_detection_data_path = os.path.join(project_path, 'DR_Detection', 'data')
+malaria_dataset_path = os.path.join(project_path, 'cell_images')
+sys.path.append(dr_detection_dataset_path)
+sys.path.append(malaria_dataset_path)
+print(sys.path)
+from dataset import ImageLabelDataset, loadImageToTensor
+from malaria_dataset import MalariaImageLabelDataset
 
 from copy import copy
 from src import utils
@@ -95,10 +110,14 @@ class Helper(Parser):
             with open(config_filename, 'w') as f:
                 yaml.dump(self.args_to_log, f, default_flow_style=False)
 
-        if self.args.dataset != 'cifar100':
-            self.args.n_classes = 10
-        else:
+        if self.args.dataset == 'cifar100':
             self.args.n_classes = 100
+        elif self.args.dataset == 'dr-detection':
+            self.args.n_classes = 5
+        elif self.args.dataset == 'malaria':
+            self.args.n_classes = 2
+        else:
+            self.args.n_classes = 10
 
         # set cutout to False if the drop_prob is 0
         if self.args.drop_path_prob == 0:
@@ -145,25 +164,54 @@ class Helper(Parser):
         if self.args.dataset == 'cifar10':
             train_transform, valid_transform = utils._data_transforms_cifar10(self.args)
             train_data = dset.CIFAR10(root=self.args.data, train=True, download=True, transform=train_transform)
+            valid_data = train_data
         elif self.args.dataset == 'cifar100':
             train_transform, valid_transform = utils._data_transforms_cifar100(self.args)
             train_data = dset.CIFAR100(root=self.args.data, train=True, download=True, transform=train_transform)
+            valid_data = train_data
         elif self.args.dataset == 'svhn':
             train_transform, valid_transform = utils._data_transforms_svhn(self.args)
             train_data = dset.SVHN(root=self.args.data, split='train', download=True, transform=train_transform)
-
+            valid_data = train_data
+        elif self.args.dataset == 'mnist':
+            train_transform, valid_transform = utils._data_transforms_mnist(self.args)
+            train_data = dset.MNIST(root=self.args.data, split='train', download=True, transform=train_transform)
+            valid_data = train_data
+        elif self.args.dataset == 'dr-detection':
+            valid_files = dr_detection_data_path + '/test_public_df.csv'
+            train_files = dr_detection_data_path + '/train_all_df.csv'
+            train_transform, valid_transform = utils._data_transforms_dr_detection(self.args)
+            labels = {0: 'No DR', 1: 'Mild DR', 2: 'Moderate DR', 3: 'Severe DR', 4: 'Poliferative DR'}
+            train_data = ImageLabelDataset(csv=train_files, transform=train_transform, label_names=labels)
+            valid_data = ImageLabelDataset(csv=valid_files, transform=valid_transform, label_names=labels)
+        elif self.args.dataset == 'malaria':
+            train_transform, valid_transform = utils._data_transforms_malaria(self.args)
+            train_data = MalariaImageLabelDataset(transform=train_transform)
+            valid_data = train_data
         num_train = len(train_data)
-        indices = list(range(num_train))
+        indices = random.sample(range(num_train), num_train)
         split = int(np.floor(self.args.train_portion * num_train))
 
-        train_queue = torch.utils.data.DataLoader(
-            train_data, batch_size=self.args.batch_size,
-            sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
-            pin_memory=True, num_workers=2)
+        if self.args.dataset == 'dr-detection':
+            train_queue = torch.utils.data.DataLoader(
+                train_data, batch_size=self.args.batch_size,
+                sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
+                pin_memory=True, num_workers=2)
 
-        valid_queue = torch.utils.data.DataLoader(
-            train_data, batch_size=self.args.batch_size,
-            sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split:num_train]),
-            pin_memory=True, num_workers=2)
+            random_sampler = torch.utils.data.sampler.RandomSampler(valid_data)
+            valid_queue = torch.utils.data.DataLoader(
+                valid_data, batch_size=self.args.batch_size,
+                sampler=random_sampler,
+                pin_memory=True, num_workers=2)
+        else:
+            train_queue = torch.utils.data.DataLoader(
+                train_data, batch_size=self.args.batch_size,
+                sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
+                pin_memory=True, num_workers=2)
+
+            valid_queue = torch.utils.data.DataLoader(
+                valid_data, batch_size=self.args.batch_size,
+                sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split:num_train]),
+                pin_memory=True, num_workers=2)
 
         return train_queue, valid_queue, train_transform, valid_transform

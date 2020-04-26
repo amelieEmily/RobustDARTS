@@ -57,10 +57,14 @@ def main():
   logging.info("args = %s", args)
 
   # load search configuration file holding the found architectures
-  configuration = '_'.join([args.space, args.dataset])
-  settings = '_'.join([str(args.search_dp), str(args.search_wd)])
+  if args.dataset == 'dr-detection':
+    configuration = '_'.join([args.space, 'cifar10'])
+  else:
+    configuration = '_'.join([args.space, args.dataset])
+  settings\
+    = '_'.join([str(args.search_dp), str(args.search_wd)])
   with open(args.archs_config_file, 'r') as f:
-    cfg = yaml.load(f)
+    cfg = yaml.load(f, Loader=yaml.Loader)
     arch = dict(cfg)[configuration][settings][args.search_task_id]
 
   print(arch)
@@ -129,13 +133,21 @@ def train(train_queue, model, criterion, optimizer):
   top5 = utils.AvgrageMeter()
   model.train()
 
-  for step, (input, target) in enumerate(train_queue):
+  for step, input_target in enumerate(train_queue):
+
+    if args.dataset == 'dr-detection':
+        input = input_target['image']
+        target = input_target['label']
+    else:
+        input = input_target[0]
+        target = input_target[1]
+
     if TORCH_VERSION in ['1.0.1', '1.1.0']:
       input = input.to(device)
       target = target.to(device)
     else:
       input = Variable(input).cuda()
-      target = Variable(target).cuda(async=True)
+      target = Variable(target).cuda()
 
     optimizer.zero_grad()
     logits, logits_aux = model(input)
@@ -178,9 +190,14 @@ def infer(valid_queue, model, criterion):
 
   if TORCH_VERSION.startswith('1'):
     with torch.no_grad():
-      for step, (input, target) in enumerate(valid_queue):
-        input = input.to(device)
-        target = target.to(device)
+      for step, input_target in enumerate(valid_queue):
+
+        if args.dataset == 'dr-detection':
+          input = input_target['image']
+          target = input_target['label']
+        else:
+          input = input_target[0]
+          target = input_target[1]
 
         logits, _ = model(input)
         loss = criterion(logits, target)
@@ -198,7 +215,7 @@ def infer(valid_queue, model, criterion):
   else:
     for step, (input, target) in enumerate(valid_queue):
       input = Variable(input, volatile=True).cuda()
-      target = Variable(target, volatile=True).cuda(async=True)
+      target = Variable(target, volatile=True).cuda()
 
       logits, _ = model(input)
       loss = criterion(logits, target)
