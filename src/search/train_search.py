@@ -106,7 +106,6 @@ def main(primitives):
       # set the epoch to the right one
       #epoch += args.epochs - epochs_to_train
 
-      scheduler.step(epoch)
       lr = scheduler.get_lr()[0]
       if args.drop_path_prob != 0:
         model.drop_path_prob = args.drop_path_prob * epoch / (args.epochs - 1)
@@ -122,6 +121,8 @@ def main(primitives):
                                    valid_queue, model, architect, criterion,
                                    optimizer, lr, analyser, la_tracker,
                                    iteration)
+
+      scheduler.step(epoch)
       logging.info('train_acc %f', train_acc)
 
       # validation
