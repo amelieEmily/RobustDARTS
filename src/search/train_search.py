@@ -469,8 +469,9 @@ def infer(valid_queue, model, criterion):
         input = input_target[0]
         target = input_target[1]
 
-    input = Variable(input, volatile=True).cuda()
-    target = Variable(target, volatile=True).cuda()
+    with torch.no_grad():
+        input = Variable(input).cuda()
+        target = Variable(target).cuda()
 
     logits = model(input)
     loss = criterion(logits, target)
