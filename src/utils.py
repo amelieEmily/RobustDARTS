@@ -313,6 +313,7 @@ def _data_transforms_malaria(args):
   train_transform = transforms.Compose([
       transforms.Resize(256),  # 256
       transforms.RandomRotation((-45.0, +45.0)),
+      transforms.ToTensor(),
   ])
   if args.cutout:
     train_transform.transforms.append(Cutout(args.cutout_length,
@@ -321,6 +322,7 @@ def _data_transforms_malaria(args):
   valid_transform = transforms.Compose([
         transforms.Resize(50),
         transforms.RandomRotation((-45.0, +45.0)),
+        transforms.ToTensor(),
     ])
   return train_transform, valid_transform
 
