@@ -312,7 +312,7 @@ def _data_transforms_malaria(args):
 
   train_transform = transforms.Compose([
       transforms.RandomRotation((-45.0, +45.0)),
-      transforms.RandomCrop(50),  # 224
+      transforms.RandomCrop(64),  # 224
       transforms.RandomHorizontalFlip(),
       transforms.RandomVerticalFlip(),
       transforms.ToTensor(),
@@ -323,7 +323,7 @@ def _data_transforms_malaria(args):
 
   valid_transform = transforms.Compose([
       transforms.RandomRotation((-45.0, +45.0)),
-      transforms.RandomCrop(50),  # 224
+      transforms.RandomCrop(64),  # 224
       transforms.RandomHorizontalFlip(),
       transforms.RandomVerticalFlip(),
       transforms.ToTensor(),
