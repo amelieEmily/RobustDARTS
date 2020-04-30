@@ -476,7 +476,7 @@ def infer(valid_queue, model, criterion):
     loss = criterion(logits, target)
 
     if args.dataset == 'malaria':
-        prec1 = utils.accuracy(logits, target, topk=(1, 5))
+        prec1 = utils.accuracy(logits, target)
         prec1 = prec1[0]
         n = input.size(0)
         objs.update(loss.data, n)
