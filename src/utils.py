@@ -311,8 +311,10 @@ def _data_transforms_dr_detection(args):
 def _data_transforms_malaria(args):
 
   train_transform = transforms.Compose([
-      transforms.Resize(50),  # 256
       transforms.RandomRotation((-45.0, +45.0)),
+      transforms.RandomResizedCrop(50, scale=(0.9, 1.1), ratio=(0.9, 1.1)),  # 224
+      transforms.RandomHorizontalFlip(),
+      transforms.RandomVerticalFlip(),
       transforms.ToTensor(),
   ])
   if args.cutout:
@@ -320,9 +322,11 @@ def _data_transforms_malaria(args):
                                       args.cutout_prob))
 
   valid_transform = transforms.Compose([
-        transforms.Resize(50),
-        transforms.RandomRotation((-45.0, +45.0)),
-        transforms.ToTensor(),
+      transforms.RandomRotation((-45.0, +45.0)),
+      transforms.RandomResizedCrop(50, scale=(0.9, 1.1), ratio=(0.9, 1.1)),  # 224
+      transforms.RandomHorizontalFlip(),
+      transforms.RandomVerticalFlip(),
+      transforms.ToTensor(),
     ])
   return train_transform, valid_transform
 
