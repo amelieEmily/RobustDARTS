@@ -311,7 +311,7 @@ def _data_transforms_dr_detection(args):
 def _data_transforms_malaria(args):
 
   train_transform = transforms.Compose([
-      transforms.Resize(256),  # 256
+      transforms.Resize(50),  # 256
       transforms.RandomRotation((-45.0, +45.0)),
       transforms.ToTensor(),
   ])
