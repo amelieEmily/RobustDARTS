@@ -383,6 +383,7 @@ def train(epoch, primitives, train_queue, valid_queue, model, architect,
 
     if args.dataset == 'malaria':
         prec1 = utils.accuracy(logits, target)
+        prec1 = prec1[0]
         objs.update(loss.data, n)
         top1.update(prec1.data, n)
     else:
@@ -476,6 +477,7 @@ def infer(valid_queue, model, criterion):
 
     if args.dataset == 'malaria':
         prec1 = utils.accuracy(logits, target, topk=(1, 5))
+        prec1 = prec1[0]
         n = input.size(0)
         objs.update(loss.data, n)
         top1.update(prec1.data, n)
