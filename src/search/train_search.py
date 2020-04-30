@@ -357,6 +357,8 @@ def train(epoch, primitives, train_queue, valid_queue, model, architect,
     input = Variable(input, requires_grad=False).cuda()
     target = Variable(target, requires_grad=False).cuda()
 
+    print("input: {}".format(input.shape))
+    print("output: {}".format(target.shape))
     if architect is not None:
       # get a random minibatch from the search queue with replacement
       if args.dataset == 'dr-detection':
