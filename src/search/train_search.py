@@ -381,10 +381,15 @@ def train(epoch, primitives, train_queue, valid_queue, model, architect,
     nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
     optimizer.step()
 
-    prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
-    objs.update(loss.data, n)
-    top1.update(prec1.data, n)
-    top5.update(prec5.data, n)
+    if args.dataset == 'malaria':
+        prec1 = utils.accuracy(logits, target)
+        objs.update(loss.data, n)
+        top1.update(prec1.data, n)
+    else:
+        prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
+        objs.update(loss.data, n)
+        top1.update(prec1.data, n)
+        top5.update(prec5.data, n)
 
     if step % args.report_freq == 0:
       logging.info('train %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
@@ -469,11 +474,17 @@ def infer(valid_queue, model, criterion):
     logits = model(input)
     loss = criterion(logits, target)
 
-    prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
-    n = input.size(0)
-    objs.update(loss.data, n)
-    top1.update(prec1.data, n)
-    top5.update(prec5.data, n)
+    if args.dataset == 'malaria':
+        prec1 = utils.accuracy(logits, target, topk=(1, 5))
+        n = input.size(0)
+        objs.update(loss.data, n)
+        top1.update(prec1.data, n)
+    else:
+        prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
+        n = input.size(0)
+        objs.update(loss.data, n)
+        top1.update(prec1.data, n)
+        top5.update(prec5.data, n)
 
     if step % args.report_freq == 0:
       logging.info('valid %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
