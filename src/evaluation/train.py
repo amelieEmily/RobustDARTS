@@ -163,16 +163,27 @@ def train(train_queue, model, criterion, optimizer):
       nn.utils.clip_grad_norm(model.parameters(), args.grad_clip)
     optimizer.step()
 
-    prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
-    n = input.size(0)
-    if TORCH_VERSION.startswith('1'):
-      objs.update(loss.item(), n)
-      top1.update(prec1.item(), n)
-      top5.update(prec5.item(), n)
+    if args.dataset == 'malaria':
+      prec1 = utils.accuracy(logits, target)
+      prec1 = prec1[0]
+      n = input.size(0)
+      if TORCH_VERSION.startswith('1'):
+        objs.update(loss.item(), n)
+        top1.update(prec1.item(), n)
+      else:
+        objs.update(loss.data[0], n)
+        top1.update(prec1.data[0], n)
     else:
-      objs.update(loss.data[0], n)
-      top1.update(prec1.data[0], n)
-      top5.update(prec5.data[0], n)
+      prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
+      n = input.size(0)
+      if TORCH_VERSION.startswith('1'):
+        objs.update(loss.item(), n)
+        top1.update(prec1.item(), n)
+        top5.update(prec5.item(), n)
+      else:
+        objs.update(loss.data[0], n)
+        top1.update(prec1.data[0], n)
+        top5.update(prec5.data[0], n)
 
     if step % args.report_freq == 0:
       logging.info('train %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
@@ -208,12 +219,18 @@ def infer(valid_queue, model, criterion):
 
         logits, _ = model(input)
         loss = criterion(logits, target)
-
-        prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
-        n = input.size(0)
-        objs.update(loss.item(), n)
-        top1.update(prec1.item(), n)
-        top5.update(prec5.item(), n)
+        if args.dataset == 'malaria':
+          prec1 = utils.accuracy(logits, target)
+          prec1 = prec1[0]
+          n = input.size(0)
+          objs.update(loss.item(), n)
+          top1.update(prec1.item(), n)
+        else:
+          prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
+          n = input.size(0)
+          objs.update(loss.item(), n)
+          top1.update(prec1.item(), n)
+          top5.update(prec5.item(), n)
 
         if step % args.report_freq == 0:
           logging.info('valid %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
@@ -227,11 +244,18 @@ def infer(valid_queue, model, criterion):
       logits, _ = model(input)
       loss = criterion(logits, target)
 
-      prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
-      n = input.size(0)
-      objs.update(loss.data[0], n)
-      top1.update(prec1.data[0], n)
-      top5.update(prec5.data[0], n)
+      if args.dataset == 'malaria':
+        prec1 = utils.accuracy(logits, target)
+        prec1 = prec1[0]
+        n = input.size(0)
+        objs.update(loss.data[0], n)
+        top1.update(prec1.data[0], n)
+      else:
+        prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
+        n = input.size(0)
+        objs.update(loss.data[0], n)
+        top1.update(prec1.data[0], n)
+        top5.update(prec5.data[0], n)
 
       if step % args.report_freq == 0:
         logging.info('valid %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
