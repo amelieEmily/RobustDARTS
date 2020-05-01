@@ -5,16 +5,20 @@ import numpy as np
 import torch.utils
 import torchvision.datasets as dset
 import sys
+import random
 FILE_ABSOLUTE_PATH = os.path.abspath(__file__)
 search_folder_path = os.path.dirname(FILE_ABSOLUTE_PATH)
 src_path = os.path.dirname(search_folder_path)
 robustdarts_path = os.path.dirname(src_path)
 project_path = os.path.dirname(robustdarts_path)
-dataset_path = os.path.join(project_path, 'DR_Detection', 'dataset')
-data_path = os.path.join(project_path, 'DR_Detection', 'data')
-sys.path.append(dataset_path)
+dr_detection_dataset_path = os.path.join(project_path, 'DR_Detection', 'dataset')
+dr_detection_data_path = os.path.join(project_path, 'DR_Detection', 'data')
+malaria_dataset_path = os.path.join(project_path, 'cell_images')
+sys.path.append(dr_detection_dataset_path)
+sys.path.append(malaria_dataset_path)
 print(sys.path)
 from dataset import ImageLabelDataset, loadImageToTensor
+from malaria_dataset import MalariaImageLabelDataset
 
 from copy import copy
 from src import utils
@@ -66,8 +70,8 @@ class Parser(object):
         parser.add_argument('--report_freq',             type=float,          default=50,             help='report frequency')
 
         # medical data file paths
-        parser.add_argument('--valid_files', type=str, default=data_path + '/test_public_df.csv',    help='path to the csv file that contain validation images')
-        parser.add_argument('--train_files', type=str, default=data_path + '/train_all_df.csv',      help='path to the csv file that contain train images')
+        parser.add_argument('--valid_files', type=str, default=dr_detection_data_path + '/test_public_df.csv',    help='path to the csv file that contain validation images')
+        parser.add_argument('--train_files', type=str, default=dr_detection_data_path + '/train_all_df.csv',      help='path to the csv file that contain train images')
 
         self.args = parser.parse_args()
         utils.print_args(self.args)
@@ -96,6 +100,8 @@ class Helper(Parser):
             self.args.n_classes = 100
         elif self.args.dataset == 'dr-detection':
             self.args.n_classes = 5
+        elif self.args.dataset == 'malaria':
+            self.args.n_classes = 2
         else:
             self.args.n_classes = 10
 
@@ -152,6 +158,14 @@ class Helper(Parser):
             valid_data = ImageLabelDataset(csv=self.args.valid_files,
                                                   transform=valid_transform,
                                                   label_names=labels)
+        elif self.args.dataset == 'malaria':
+            train_transform, valid_transform = utils._data_transforms_malaria(self.args)
+            train_data = MalariaImageLabelDataset(transform=train_transform, shuffle=True)
+            valid_data = train_data
+            train_portion = 0.9
+            num_train = len(train_data)
+            indices = random.sample(range(num_train), num_train)
+            split = int(np.floor(train_portion * num_train))
 
         if self.args.dataset == 'dr-detection':
             train_queue = torch.utils.data.DataLoader(
@@ -161,6 +175,16 @@ class Helper(Parser):
             valid_queue = torch.utils.data.DataLoader(
                 valid_data, batch_size=self.args.batch_size,
                 sampler=torch.utils.data.sampler.RandomSampler(valid_data), pin_memory=True, num_workers=2)
+        elif self.args.dataset == 'malaria':
+            train_queue = torch.utils.data.DataLoader(
+                train_data, batch_size=self.args.batch_size,
+                sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
+                pin_memory=True, num_workers=2)
+
+            valid_queue = torch.utils.data.DataLoader(
+                valid_data, batch_size=self.args.batch_size,
+                sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split:num_train]),
+                pin_memory=True, num_workers=2)
         else:
             train_queue = torch.utils.data.DataLoader(
                 train_data, batch_size=self.args.batch_size,

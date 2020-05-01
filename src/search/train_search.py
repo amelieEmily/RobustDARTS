@@ -106,7 +106,6 @@ def main(primitives):
       # set the epoch to the right one
       #epoch += args.epochs - epochs_to_train
 
-      scheduler.step(epoch)
       lr = scheduler.get_lr()[0]
       if args.drop_path_prob != 0:
         model.drop_path_prob = args.drop_path_prob * epoch / (args.epochs - 1)
@@ -122,6 +121,8 @@ def main(primitives):
                                    valid_queue, model, architect, criterion,
                                    optimizer, lr, analyser, la_tracker,
                                    iteration)
+
+      scheduler.step(epoch)
       logging.info('train_acc %f', train_acc)
 
       # validation
@@ -338,12 +339,12 @@ def train(epoch, primitives, train_queue, valid_queue, model, architect,
   top1 = utils.AvgrageMeter()
   top5 = utils.AvgrageMeter()
 
-  # count = 0
-  # for i in train_queue:
-  #     print(i)
-  #     count += 1
-  #     if count == 2:
-  #         break
+  count = 0
+  for i in train_queue:
+      print(i)
+      count += 1
+      if count == 2:
+          break
   for step, input_target in enumerate(train_queue):
     if args.dataset == 'dr-detection':
         input = input_target['image']
@@ -380,10 +381,16 @@ def train(epoch, primitives, train_queue, valid_queue, model, architect,
     nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
     optimizer.step()
 
-    prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
-    objs.update(loss.data, n)
-    top1.update(prec1.data, n)
-    top5.update(prec5.data, n)
+    if args.dataset == 'malaria':
+        prec1 = utils.accuracy(logits, target)
+        prec1 = prec1[0]
+        objs.update(loss.data, n)
+        top1.update(prec1.data, n)
+    else:
+        prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
+        objs.update(loss.data, n)
+        top1.update(prec1.data, n)
+        top5.update(prec5.data, n)
 
     if step % args.report_freq == 0:
       logging.info('train %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
@@ -462,17 +469,25 @@ def infer(valid_queue, model, criterion):
         input = input_target[0]
         target = input_target[1]
 
-    input = Variable(input, volatile=True).cuda()
-    target = Variable(target, volatile=True).cuda()
+    with torch.no_grad():
+        input = Variable(input).cuda()
+        target = Variable(target).cuda()
 
     logits = model(input)
     loss = criterion(logits, target)
 
-    prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
-    n = input.size(0)
-    objs.update(loss.data, n)
-    top1.update(prec1.data, n)
-    top5.update(prec5.data, n)
+    if args.dataset == 'malaria':
+        prec1 = utils.accuracy(logits, target)
+        prec1 = prec1[0]
+        n = input.size(0)
+        objs.update(loss.data, n)
+        top1.update(prec1.data, n)
+    else:
+        prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
+        n = input.size(0)
+        objs.update(loss.data, n)
+        top1.update(prec1.data, n)
+        top5.update(prec5.data, n)
 
     if step % args.report_freq == 0:
       logging.info('valid %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
