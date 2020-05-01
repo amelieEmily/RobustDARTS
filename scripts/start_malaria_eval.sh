@@ -6,8 +6,9 @@
 export PATH=/vol/bitbucket/${USER}/miniconda3/bin/:$PATH
 source activate
 source /vol/cuda/10.0.130/setup.sh
-TERM=vt100 # or TERM=xterm
+TERM=vt100
 /usr/bin/nvidia-smi
 uptime
-python src/search/train_search.py --unrolled --cutout --report_freq_hessian 2 --space s1 --dataset malaria --drop_path_prob 0.0 --weight_decay 0.0009 --batch_size 32
+python src/evaluation/train.py --cutout --auxiliary --seed 1 --space s1 --dataset malaria --search_dp 0.0 --search_wd 0.0009 --layers 14 --batch_size 32
+
 
