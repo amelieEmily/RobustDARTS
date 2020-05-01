@@ -75,9 +75,14 @@ class AuxiliaryHead(nn.Module):
       nn.BatchNorm2d(768),
       nn.ReLU(inplace=True)
     )
+    # for cifar1, cifar100, svhn:
     # self.classifier = nn.Linear(768, num_classes)
-    # use the above line code instead of line beneath when using other data from dr-detection data
-    self.classifier = nn.Linear(221952, num_classes)
+
+    # for dr-detection:
+    # self.classifier = nn.Linear(221952, num_classes)
+
+    # for malaria:
+    self.classifier = nn.Linear(6912, num_classes)
   def forward(self, x):
     x = self.features(x)
     x = self.classifier(x.view(x.size(0),-1))
