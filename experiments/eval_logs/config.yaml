@@ -1,0 +1,11 @@
+archs_config_file: ./experiments/search_logs/results_arch.yaml
+auxiliary: true
+auxiliary_weight: 0.4
+batch_size: 3
+cutout_length: 16
+epochs: 600
+grad_clip: 5
+init_channels: 16
+layers: 14
+learning_rate: 0.025
+momentum: 0.9
