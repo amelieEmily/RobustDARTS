@@ -160,12 +160,8 @@ class Helper(Parser):
                                                   label_names=labels)
         elif self.args.dataset == 'malaria':
             train_transform, valid_transform = utils._data_transforms_malaria(self.args)
-            train_data = MalariaImageLabelDataset(transform=train_transform, shuffle=True)
-            valid_data = train_data
-            train_portion = 0.9
-            num_train = len(train_data)
-            indices = random.sample(range(num_train), num_train)
-            split = int(np.floor(train_portion * num_train))
+            train_data = MalariaImageLabelDataset(transform=train_transform, train=True)
+            valid_data = MalariaImageLabelDataset(transform=train_transform, train=False)
 
         if self.args.dataset == 'dr-detection':
             train_queue = torch.utils.data.DataLoader(
@@ -175,16 +171,6 @@ class Helper(Parser):
             valid_queue = torch.utils.data.DataLoader(
                 valid_data, batch_size=self.args.batch_size,
                 sampler=torch.utils.data.sampler.RandomSampler(valid_data), pin_memory=True, num_workers=2)
-        elif self.args.dataset == 'malaria':
-            train_queue = torch.utils.data.DataLoader(
-                train_data, batch_size=self.args.batch_size,
-                sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
-                pin_memory=True, num_workers=2)
-
-            valid_queue = torch.utils.data.DataLoader(
-                valid_data, batch_size=self.args.batch_size,
-                sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split:num_train]),
-                pin_memory=True, num_workers=2)
         else:
             train_queue = torch.utils.data.DataLoader(
                 train_data, batch_size=self.args.batch_size,

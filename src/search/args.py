@@ -178,15 +178,14 @@ class Helper(Parser):
             train_data = dset.MNIST(root=self.args.data, split='train', download=True, transform=train_transform)
             valid_data = train_data
         elif self.args.dataset == 'dr-detection':
-            valid_files = dr_detection_data_path + '/test_public_df.csv'
             train_files = dr_detection_data_path + '/train_all_df.csv'
             train_transform, valid_transform = utils._data_transforms_dr_detection(self.args)
             labels = {0: 'No DR', 1: 'Mild DR', 2: 'Moderate DR', 3: 'Severe DR', 4: 'Poliferative DR'}
             train_data = ImageLabelDataset(csv=train_files, transform=train_transform, label_names=labels)
-            valid_data = ImageLabelDataset(csv=valid_files, transform=valid_transform, label_names=labels)
+            valid_data = train_data
         elif self.args.dataset == 'malaria':
             train_transform, valid_transform = utils._data_transforms_malaria(self.args)
-            train_data = MalariaImageLabelDataset(transform=train_transform)
+            train_data = MalariaImageLabelDataset(transform=train_transform, train=True)
             valid_data = train_data
         num_train = len(train_data)
         indices = random.sample(range(num_train), num_train)
