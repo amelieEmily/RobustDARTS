@@ -41,6 +41,21 @@ logging.getLogger().addHandler(fh)
 if TORCH_VERSION.startswith('1'):
     device = torch.device('cuda:{}'.format(args.gpu))
 
+class NetworkExtension(nn.Module):
+
+  def __init__(self, orig_num_classes, num_classes, auxiliary):
+    super(NetworkExtension, self).__init__()
+    self._auxiliary = auxiliary
+    self.classifier = nn.Linear(orig_num_classes ,num_classes)
+
+  def forward(self, logits_logits_aux):
+    logits = logits_logits_aux[0]
+    logits_aux = logits_logits_aux[1]
+    if self._auxiliary and self.training:
+      logits_aux = torch.sigmoid(self.classifier(logits_aux))
+    logits = torch.sigmoid(self.classifier(logits))
+    return logits, logits_aux
+
 def main():
   if not torch.cuda.is_available():
     logging.info('no gpu device available')
@@ -58,7 +73,7 @@ def main():
 
   # load search configuration file holding the found architectures
   if args.dataset == 'dr-detection':
-    configuration = '_'.join([args.space, 'cifar10'])
+    configuration = '_'.join([args.space, 'cifar10']) #transer learning from cifar10
   else:
     configuration = '_'.join([args.space, args.dataset])
   settings\
@@ -70,6 +85,10 @@ def main():
   print(arch)
   genotype = eval(arch)
   model = Network(args.init_channels, args.n_classes, args.layers, args.auxiliary, genotype)
+
+  if args.dataset == 'dr-detection':
+    extension = NetworkExtension(10, 5, args.auxiliary)
+    model = nn.Sequential(model, extension)
   if TORCH_VERSION.startswith('1'):
     model = model.to(device)
   else:
@@ -237,9 +256,13 @@ def infer(valid_queue, model, criterion):
           if args.debug:
             break
   else:
-    for step, (input, target) in enumerate(valid_queue):
-      input = Variable(input, volatile=True).cuda()
-      target = Variable(target, volatile=True).cuda()
+    for step, input_target in enumerate(valid_queue):
+      if args.dataset == 'dr-detection':
+        input = Variable(input_target['image'], volatile=True).cuda()
+        target = Variable(input_target['label'], volatile=True).cuda()
+      else:
+        input = Variable(input_target[0], volatile=True).cuda()
+        target = Variable(input_target[1], volatile=True).cuda()
 
       logits, _ = model(input)
       loss = criterion(logits, target)
