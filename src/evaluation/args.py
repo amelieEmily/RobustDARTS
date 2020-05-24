@@ -98,8 +98,6 @@ class Helper(Parser):
 
         if self.args.dataset == 'cifar100':
             self.args.n_classes = 100
-        elif self.args.dataset == 'dr-detection':
-            self.args.n_classes = 5
         elif self.args.dataset == 'malaria':
             self.args.n_classes = 2
         else:
