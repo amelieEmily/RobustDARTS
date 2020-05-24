@@ -84,11 +84,13 @@ def main():
 
   print(arch)
   genotype = eval(arch)
-  model = Network(args.init_channels, args.n_classes, args.layers, args.auxiliary, genotype)
+  darts_model = Network(args.init_channels, args.n_classes, args.layers, args.auxiliary, genotype)
 
   if args.dataset == 'dr-detection':
     extension = NetworkExtension(10, 5, args.auxiliary)
-    model = nn.Sequential(model, extension)
+    model = nn.Sequential(darts_model, extension)
+  else:
+    model = darts_model
   if TORCH_VERSION.startswith('1'):
     model = model.to(device)
   else:
@@ -123,7 +125,7 @@ def main():
   for epoch in range(args.epochs):
     scheduler.step()
     logging.info('epoch %d lr %e', epoch, scheduler.get_lr()[0])
-    model.drop_path_prob = args.drop_path_prob * epoch / args.epochs
+    darts_model.drop_path_prob = args.drop_path_prob * epoch / args.epochs
 
     # training
     train_acc, train_obj = train(train_queue, model, criterion, optimizer)
