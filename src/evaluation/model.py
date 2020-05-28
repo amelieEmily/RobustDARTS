@@ -81,10 +81,10 @@ class AuxiliaryHead(nn.Module):
     # self.classifier = nn.Linear(768, num_classes)
 
     # for dr-detection:
-    self.classifier = nn.Linear(221952, num_classes)
+    #self.classifier = nn.Linear(221952, num_classes)
 
     # for malaria:
-    #self.classifier = nn.Linear(6912, num_classes)
+    self.classifier = nn.Linear(6912, num_classes)
   def forward(self, x):
     x = self.features(x)
     x = self.classifier(x.view(x.size(0), -1))
