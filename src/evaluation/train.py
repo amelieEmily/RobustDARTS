@@ -87,7 +87,7 @@ def main():
   darts_model = Network(args.init_channels, args.n_classes, args.layers, args.auxiliary, genotype)
 
   if args.dataset == 'dr-detection':
-    extension = NetworkExtension(10, 5, args.auxiliary)
+    extension = NetworkExtension(10, 2, args.auxiliary)
     model = nn.Sequential(darts_model, extension)
   else:
     model = darts_model
@@ -158,7 +158,7 @@ def train(train_queue, model, criterion, optimizer):
 
     if args.dataset == 'dr-detection':
         input = input_target['image']
-        target = input_target['label']
+        target = input_target['label_bin']
     else:
         input = input_target[0]
         target = input_target[1]
@@ -226,7 +226,7 @@ def infer(valid_queue, model, criterion):
 
         if args.dataset == 'dr-detection':
           input = input_target['image']
-          target = input_target['label']
+          target = input_target['label_bin']
         else:
           input = input_target[0]
           target = input_target[1]
@@ -261,7 +261,7 @@ def infer(valid_queue, model, criterion):
     for step, input_target in enumerate(valid_queue):
       if args.dataset == 'dr-detection':
         input = Variable(input_target['image'], volatile=True).cuda()
-        target = Variable(input_target['label'], volatile=True).cuda()
+        target = Variable(input_target['label_bin'], volatile=True).cuda()
       else:
         input = Variable(input_target[0], volatile=True).cuda()
         target = Variable(input_target[1], volatile=True).cuda()
