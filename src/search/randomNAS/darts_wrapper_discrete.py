@@ -99,7 +99,7 @@ class DartsWrapper(Helper):
       n = input.size(0)
 
       input = Variable(input, requires_grad=False).cuda()
-      target = Variable(target, requires_grad=False).cuda(async=True)
+      target = Variable(target, requires_grad=False).cuda()
 
       # get a random minibatch from the search queue with replacement
       self.optimizer.zero_grad()
@@ -164,7 +164,7 @@ class DartsWrapper(Helper):
           self.valid_iter = iter(self.valid_queue)
           input, target = next(self.valid_iter)
         input = Variable(input, volatile=True).cuda()
-        target = Variable(target, volatile=True).cuda(async=True)
+        target = Variable(target, volatile=True).cuda()
 
         logits = self.model(input, discrete=True)
         loss = self.criterion(logits, target)
