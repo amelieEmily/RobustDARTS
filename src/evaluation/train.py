@@ -87,7 +87,7 @@ def main():
   darts_model = Network(args.init_channels, args.n_classes, args.layers, args.auxiliary, genotype)
 
   if args.dataset == 'dr-detection':
-    extension = NetworkExtension(10, 2, args.auxiliary)
+    extension = NetworkExtension(10, 5, args.auxiliary)
     model = nn.Sequential(darts_model, extension)
   else:
     model = darts_model
