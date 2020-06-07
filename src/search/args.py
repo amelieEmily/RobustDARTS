@@ -184,7 +184,7 @@ class Helper(Parser):
             train_files = dr_detection_data_path + '/train_all_df.csv'
             train_transform, valid_transform = utils._data_transforms_dr_detection(self.args)
             labels = {0: 'No DR', 1: 'Mild DR', 2: 'Moderate DR', 3: 'Severe DR', 4: 'Poliferative DR'}
-            train_data = ImageLabelDataset(csv=train_files, transform=train_transform, label_names=labels)
+            train_data = ImageLabelDataset(csv=train_files, shuffle=True, transform=train_transform, label_names=labels)
             valid_data = train_data
         elif self.args.dataset == 'malaria':
             train_transform, valid_transform = utils._data_transforms_malaria(self.args)
