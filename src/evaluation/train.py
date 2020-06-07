@@ -158,7 +158,7 @@ def train(train_queue, model, criterion, optimizer):
 
     if args.dataset == 'dr-detection':
         input = input_target['image']
-        target = input_target['label_bin']
+        target = input_target['label']
     else:
         input = input_target[0]
         target = input_target[1]
@@ -231,7 +231,7 @@ def infer(valid_queue, model, criterion):
 
         if args.dataset == 'dr-detection':
           input = input_target['image']
-          target = input_target['label_bin']
+          target = input_target['label']
         else:
           input = input_target[0]
           target = input_target[1]
@@ -271,7 +271,7 @@ def infer(valid_queue, model, criterion):
     for step, input_target in enumerate(valid_queue):
       if args.dataset == 'dr-detection':
         input = Variable(input_target['image'], volatile=True).cuda()
-        target = Variable(input_target['label_bin'], volatile=True).cuda()
+        target = Variable(input_target['label'], volatile=True).cuda()
       else:
         input = Variable(input_target[0], volatile=True).cuda()
         target = Variable(input_target[1], volatile=True).cuda()

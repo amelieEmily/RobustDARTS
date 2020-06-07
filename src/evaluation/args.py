@@ -73,6 +73,7 @@ class Parser(object):
         parser.add_argument('--valid_files', type=str, default=dr_detection_data_path + '/test_public_df.csv',    help='path to the csv file that contain validation images')
         parser.add_argument('--train_files', type=str, default=dr_detection_data_path + '/train_all_df.csv',      help='path to the csv file that contain train images')
 
+        parser.add_argument('--is_eval', action='store_true', default=True,          help='indicate evaluation phase for transformations')
         self.args = parser.parse_args()
         utils.print_args(self.args)
 

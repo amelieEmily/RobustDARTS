@@ -127,7 +127,7 @@ class EVLocalAvg(object):
                 consider for early stopping. Default: 2
         """
         if int(self.la_epochs[epoch] - self.ev_freq*delta) >= es_start_epoch:
-            # the current local average corresponds to 
+            # the current local average corresponds to
             # epoch - int(self.ev_freq*np.floor(self.window/2))
             current_la = self.ev_local_avg[-1]
             # by default take the local average corresponding to epoch
@@ -281,31 +281,56 @@ def _data_transforms_svhn(args):
   return train_transform, valid_transform
 
 def _data_transforms_dr_detection(args):
+
   DR_DETECTION_MEAN = [0.42, 0.22, 0.075]
   DR_DETECTION_STD = [0.27, 0.15, 0.081]
+  if args.is_eval:
 
-  train_transform = transforms.Compose([
-      transforms.Resize(256),  # 256
-      transforms.RandomRotation((-45.0, +45.0)),
-      transforms.RandomResizedCrop(224, scale=(0.9, 1.1), ratio=(0.9, 1.1)),  # 224
-      transforms.RandomHorizontalFlip(),
-      transforms.RandomVerticalFlip(),
-      transforms.ColorJitter(brightness=0.1, contrast=[0.75, 1.5],
-                             saturation=[0.75, 1.5], hue=0.15),
-      transforms.ToTensor(),
-      transforms.Normalize(mean=DR_DETECTION_MEAN, std=DR_DETECTION_STD),
-      # transforms.RandomErasing(),
-  ])
-  if args.cutout:
-    train_transform.transforms.append(Cutout(args.cutout_length,
-                                      args.cutout_prob))
+      train_transform = transforms.Compose([
+            transforms.Resize(540), # 256
+            transforms.RandomRotation((-45.0, +45.0)),
+            transforms.RandomResizedCrop(512, scale=(0.9, 1.1), ratio=(0.9, 1.1)), # 224
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomVerticalFlip(),
+            transforms.ColorJitter(brightness=0.1, contrast=[0.75,1.5],
+                                   saturation=[0.75,1.5], hue=0.15),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=DR_DETECTION_MEAN, std=DR_DETECTION_STD)
+      ])
+      if args.cutout:
+          train_transform.transforms.append(Cutout(args.cutout_length,
+                                                   args.cutout_prob))
 
-  valid_transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=DR_DETECTION_MEAN, std=DR_DETECTION_STD),
-    ])
+      valid_transform = transforms.Compose([
+            transforms.Resize(540),
+            transforms.CenterCrop(512),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=DR_DETECTION_MEAN, std=DR_DETECTION_STD),
+      ])
+
+  else:
+      train_transform = transforms.Compose([
+          transforms.Resize(256),  # 256
+          transforms.RandomRotation((-45.0, +45.0)),
+          transforms.RandomResizedCrop(224, scale=(0.9, 1.1), ratio=(0.9, 1.1)),  # 224
+          transforms.RandomHorizontalFlip(),
+          transforms.RandomVerticalFlip(),
+          transforms.ColorJitter(brightness=0.1, contrast=[0.75, 1.5],
+                                 saturation=[0.75, 1.5], hue=0.15),
+          transforms.ToTensor(),
+          transforms.Normalize(mean=DR_DETECTION_MEAN, std=DR_DETECTION_STD),
+          # transforms.RandomErasing(),
+      ])
+      if args.cutout:
+        train_transform.transforms.append(Cutout(args.cutout_length,
+                                          args.cutout_prob))
+
+      valid_transform = transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=DR_DETECTION_MEAN, std=DR_DETECTION_STD),
+        ])
   return train_transform, valid_transform
 
 def _data_transforms_malaria(args):

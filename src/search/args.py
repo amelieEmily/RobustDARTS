@@ -87,6 +87,9 @@ class Parser(object):
         parser.add_argument('--randomnas_rounds',        type=int,            default=None,           help='number of evaluation rounds in RandomNAS')
         parser.add_argument('--n_samples',               type=int,            default=1000,           help='number of discrete architectures to sample during eval')
 
+
+        parser.add_argument('--is_eval', action='store_true', default=False,          help='indicate evaluation phase for transformations')
+
         self.args = parser.parse_args()
         utils.print_args(self.args)
 
