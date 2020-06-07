@@ -131,10 +131,10 @@ class DartsWrapper(Helper):
         valid_err, valid_obj = self.evaluate(arch)
         logger.info('epoch %d  |  train_acc %f  |  valid_acc %f' % (self.epochs, self.top1.avg, 1-valid_err))
         self.save()
-        errors_dict['train_acc'].append(self.top1.avg)
-        errors_dict['train_loss'].append(self.objs.avg)
-        errors_dict['valid_acc'].append(1-valid_err)
-        errors_dict['valid_loss'].append(valid_obj)
+        errors_dict['train_acc'].append(self.top1.avg.item())
+        errors_dict['train_loss'].append(self.objs.avg.item())
+        errors_dict['valid_acc'].append(1-valid_err.item())
+        errors_dict['valid_loss'].append(valid_obj.item())
 
 
     def evaluate(self, arch, split=None):
