@@ -87,8 +87,8 @@ class AuxiliaryHead(nn.Module):
         nn.BatchNorm2d(768),
         nn.ReLU(inplace=True),
 
-        nn.Conv2d(768, 5, 3, bias=False),
-        nn.BatchNorm2d(5),
+        nn.Conv2d(768, 3, 3, bias=False),
+        nn.BatchNorm2d(3),
         nn.ReLU(inplace=True),
 
       )
