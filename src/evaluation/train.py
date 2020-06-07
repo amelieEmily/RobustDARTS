@@ -140,6 +140,7 @@ def main():
     errors_dict['valid_acc'].append(100 - valid_acc)
     errors_dict['valid_loss'].append(valid_obj)
 
+  torch.save(model.state_dict(), args.save)
   with codecs.open(os.path.join(args.save,
                                 'errors_{}_{}.json'.format(args.search_task_id, args.task_id)),
                    'w', encoding='utf-8') as file:
