@@ -117,9 +117,9 @@ class DartsWrapper(Helper):
         self.top5 = utils.AvgrageMeter()
 
       prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
-      self.objs.update(loss.data[0], n)
-      self.top1.update(prec1.data[0], n)
-      self.top5.update(prec5.data[0], n)
+      self.objs.update(loss.data, n)
+      self.top1.update(prec1.data, n)
+      self.top5.update(prec5.data, n)
 
       if step % args.report_freq == 0:
         logger.info('train %03d %e %f %f', step, self.objs.avg, self.top1.avg, self.top5.avg)
@@ -171,9 +171,9 @@ class DartsWrapper(Helper):
 
         prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
         n = input.size(0)
-        objs.update(loss.data[0], n)
-        top1.update(prec1.data[0], n)
-        top5.update(prec5.data[0], n)
+        objs.update(loss.data, n)
+        top1.update(prec1.data, n)
+        top5.update(prec5.data, n)
 
         if step % self.args.report_freq == 0:
           logger.info('valid %03d %e %f %f', step, objs.avg, top1.avg, top5.avg)
