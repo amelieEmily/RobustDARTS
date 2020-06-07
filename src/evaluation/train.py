@@ -84,12 +84,13 @@ def main():
 
   print(arch)
   genotype = eval(arch)
-  darts_model = Network(args.init_channels, args.n_classes, args.layers, args.auxiliary, genotype)
+  if args.dataset == 'malaria':
+    darts_model = Network(args.init_channels, 1000, args.layers, args.auxiliary, genotype)
+    extension_model = NetworkExtension(1000, 2, args.auxiliary)
+    model = nn.Sequential(darts_model,extension_model)
+  else :
+    model = Network(args.init_channels, args.n_classes, args.layers, args.auxiliary, genotype)
 
-  if args.dataset == 'dr-detection':
-    model = darts_model
-  else:
-    model = darts_model
   if TORCH_VERSION.startswith('1'):
     model = model.to(device)
   else:
@@ -97,6 +98,7 @@ def main():
 
   if args.model_path is not None:
     utils.load(model, args.model_path, genotype)
+
 
   logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
 
@@ -140,7 +142,10 @@ def main():
     errors_dict['valid_acc'].append(100 - valid_acc)
     errors_dict['valid_loss'].append(valid_obj)
 
-  torch.save(model.state_dict(), args.save)
+  if args.dataset == 'malaria':
+    torch.save(darts_model.state_dict(), args.save)
+  else:
+    torch.save(model.state_dict(), args.save)
   with codecs.open(os.path.join(args.save,
                                 'errors_{}_{}.json'.format(args.search_task_id, args.task_id)),
                    'w', encoding='utf-8') as file:
