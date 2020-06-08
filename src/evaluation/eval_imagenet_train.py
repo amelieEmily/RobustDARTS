@@ -113,9 +113,9 @@ def main():
   traindir = os.path.join(args.data, 'train')
   validdir = os.path.join(args.data, 'val')
   normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-  train_data = dset.ImageFolder(
-    traindir,
-    transforms.Compose([
+  train_data = dset.ImageNet(
+    args.data,
+    transform=transforms.Compose([
       transforms.RandomResizedCrop(224),
       transforms.RandomHorizontalFlip(),
       transforms.ColorJitter(
@@ -126,9 +126,9 @@ def main():
       transforms.ToTensor(),
       normalize,
     ]))
-  valid_data = dset.ImageFolder(
-    validdir,
-    transforms.Compose([
+  valid_data = dset.ImageNet(
+    args.data,split='val',
+    transform=transforms.Compose([
       transforms.Resize(256),
       transforms.CenterCrop(224),
       transforms.ToTensor(),
