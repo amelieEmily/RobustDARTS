@@ -19,6 +19,7 @@ import torch.backends.cudnn as cudnn
 
 from torch.autograd import Variable
 from model import NetworkImageNet as Network
+from src.utils import Genotype
 
 
 parser = argparse.ArgumentParser("imagenet")
