@@ -172,7 +172,7 @@ class AuxiliaryHeadImageNet(nn.Module):
       # nn.BatchNorm2d(768),
       nn.ReLU(inplace=True)
     )
-    self.classifier = nn.Linear(768, num_classes)
+    self.classifier = nn.Linear(6912, num_classes)
 
   def forward(self, x):
     x = self.features(x)
