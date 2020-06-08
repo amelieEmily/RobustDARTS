@@ -275,11 +275,11 @@ def infer(valid_queue, model, criterion):
   else:
     for step, input_target in enumerate(valid_queue):
       if args.dataset == 'dr-detection':
-        input = Variable(input_target['image'], volatile=True).cuda()
-        target = Variable(input_target['label'], volatile=True).cuda()
+        input = Variable(input_target['image'], requires_grad=False).cuda()
+        target = Variable(input_target['label'], requires_grad=False).cuda()
       else:
-        input = Variable(input_target[0], volatile=True).cuda()
-        target = Variable(input_target[1], volatile=True).cuda()
+        input = Variable(input_target[0], requires_grad=False).cuda()
+        target = Variable(input_target[1], requires_grad=False).cuda()
 
       logits, _ = model(input)
       loss = criterion(logits, target)
