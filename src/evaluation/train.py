@@ -84,12 +84,14 @@ def main():
 
   print(arch)
   genotype = eval(arch)
+  darts_model = Network(args.init_channels, args.n_classes, args.layers, args.auxiliary, genotype)
+
   if args.dataset == 'malaria':
     darts_model = Network(args.init_channels, 1000, args.layers, args.auxiliary, genotype)
     extension_model = NetworkExtension(1000, 2, args.auxiliary)
     model = nn.Sequential(darts_model,extension_model)
   else :
-    model = Network(args.init_channels, args.n_classes, args.layers, args.auxiliary, genotype)
+    model = darts_model
 
   if TORCH_VERSION.startswith('1'):
     model = model.to(device)
