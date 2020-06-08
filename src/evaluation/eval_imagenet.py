@@ -10,7 +10,6 @@ import random
 import logging
 import argparse
 import torch.nn as nn
-import genotypes
 import torch.utils
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
