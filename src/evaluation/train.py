@@ -129,9 +129,9 @@ def main():
                  'valid_loss': []}
 
   if args.dataset == 'dr-detection':
-    input_size = train_queue[0]['image'].size()
+    input_size = train_queue[1]['image'].size()
   else:
-    input_size = train_queue[0][0].size()
+    input_size = train_queue[1][0].size()
   logging.info(summary(model, input_size, args.batch_size))
 
   for epoch in range(args.epochs):
