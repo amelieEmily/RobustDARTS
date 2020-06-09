@@ -145,9 +145,10 @@ def main():
     errors_dict['valid_loss'].append(valid_obj)
 
   if args.dataset == 'malaria':
-    torch.save(darts_model.state_dict(), args.save)
+    utils.save_checkpoint(darts_model.state_dict(), False, args.save, epoch, args.task_id)
   else:
-    torch.save(model.state_dict(), args.save)
+    utils.save_checkpoint(model.state_dict(), False, args.save, epoch, args.task_id)
+
   with codecs.open(os.path.join(args.save,
                                 'errors_{}_{}.json'.format(args.search_task_id, args.task_id)),
                    'w', encoding='utf-8') as file:
