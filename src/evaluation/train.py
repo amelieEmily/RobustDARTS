@@ -15,6 +15,7 @@ import torchvision.datasets as dset
 import torch.backends.cudnn as cudnn
 from torch.autograd import Variable
 from torch.optim.lr_scheduler import CosineAnnealingLR
+from torchsummary import summary
 
 sys.path.insert(0, '../RobustDARTS')
 
@@ -104,6 +105,8 @@ def main():
 
   logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
 
+
+
   criterion = nn.CrossEntropyLoss()
   if TORCH_VERSION.startswith('1'):
     criterion = criterion.to(device)
@@ -124,6 +127,12 @@ def main():
 
   errors_dict = {'train_acc': [], 'train_loss': [], 'valid_acc': [],
                  'valid_loss': []}
+
+  if args.dataset == 'dr-detection':
+    input_size = train_queue[0]['image'].size()
+  else:
+    input_size = train_queue[0][0].size()
+  logging.info(summary(model, input_size, args.batch_size))
 
   for epoch in range(args.epochs):
     scheduler.step()
