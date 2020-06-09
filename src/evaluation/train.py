@@ -128,11 +128,7 @@ def main():
   errors_dict = {'train_acc': [], 'train_loss': [], 'valid_acc': [],
                  'valid_loss': []}
 
-  if args.dataset == 'dr-detection':
-    input_size = train_queue[1]['image'].size()
-  else:
-    input_size = train_queue[1][0].size()
-  logging.info(summary(model, input_size, args.batch_size))
+  logging.info(summary(model, (3,32,32), args.batch_size))
 
   for epoch in range(args.epochs):
     scheduler.step()
