@@ -104,6 +104,7 @@ def main():
 
 
   logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
+  logging.info(summary(model, (3, 32, 32)))
 
 
 
@@ -127,8 +128,6 @@ def main():
 
   errors_dict = {'train_acc': [], 'train_loss': [], 'valid_acc': [],
                  'valid_loss': []}
-
-  logging.info(summary(model, (3,32,32), args.batch_size))
 
   for epoch in range(args.epochs):
     scheduler.step()
