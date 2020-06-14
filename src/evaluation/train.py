@@ -74,7 +74,7 @@ def main():
 
   # load search configuration file holding the found architectures
   if args.dataset == 'dr-detection':
-    configuration = '_'.join([args.space, 'malaria']) #transer learning from cifar10
+    configuration = '_'.join([args.space, 'malaria']) #transer learning from malaria
   else:
     configuration = '_'.join([args.space, args.dataset])
   settings\
