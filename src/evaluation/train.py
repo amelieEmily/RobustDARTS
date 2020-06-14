@@ -104,7 +104,6 @@ def main():
 
 
   logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
-  logging.info(summary(model, (3, 32, 32)))
 
 
 
