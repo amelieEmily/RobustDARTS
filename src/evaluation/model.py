@@ -93,7 +93,7 @@ class AuxiliaryHead(nn.Module):
         nn.BatchNorm2d(768),
         nn.ReLU(inplace=True)
       )
-      self.classifier = nn.Linear(6912, num_classes)
+      self.classifier = nn.Linear(768, num_classes)
 
     # for cifar1, cifar100, svhn:
     # self.classifier = nn.Linear(768, num_classes)
